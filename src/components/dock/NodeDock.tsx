@@ -21,7 +21,7 @@ export function NodeDock({
         event.stopPropagation()
       }
       className="
-        absolute bottom-5 left-1/2 z-50
+        absolute left-1/2 z-50
         -translate-x-1/2
         rounded-2xl
         border border-slate-200
@@ -29,6 +29,9 @@ export function NodeDock({
         p-3
         shadow-xl
       "
+      style={{
+        bottom: "calc(1.25rem + env(safe-area-inset-bottom, 0px))",
+      }}
     >
       <div className="mb-2 text-xs font-medium text-slate-400">
         Components
