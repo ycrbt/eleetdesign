@@ -1,0 +1,14 @@
+{
+  "id": "load-balancer-v1",
+  "title": "Scale Beyond One Server",
+  "narrative": "Traffic has grown beyond what a single server can process. Distribute incoming requests across multiple servers so the system can handle the full load without dropping requests.",
+  "components_available": ["ec2", "load_balancer"],
+  "traffic_pattern": {
+    "phases": [
+      { "duration_s": 3600, "req_per_s": 180, "read_write_ratio": 0.95 }
+    ]
+  },
+  "constraints": { "max_budget_per_month": 100 },
+  "failure_condition": { "type": "capacity_overflow" },
+  "win_condition": { "min_success_rate": 0.99, "evaluation_window_s": 10 }
+}
