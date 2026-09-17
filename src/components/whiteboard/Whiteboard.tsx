@@ -11,8 +11,6 @@ type DragState =
   | { type: "node"; nodeId: string; offset: Point }
   | null;
 
-const MIN_ZOOM = 0.35;
-const MAX_ZOOM = 2;
 const GRID_SIZE = 32;
 
 export default function Whiteboard() {
@@ -25,7 +23,7 @@ export default function Whiteboard() {
   const [connections, setConnections] = useState<Connection[]>([]);
   const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
   const [pan, setPan] = useState<Point>({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
+  const zoom = 1;
   const [draggedNodeId, setDraggedNodeId] = useState<string | null>(null);
   const [dragPosition, setDragPosition] = useState<Point | null>(null);
   const [isPanning, setIsPanning] = useState(false);
