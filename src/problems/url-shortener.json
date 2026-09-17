@@ -1,0 +1,36 @@
+{
+  "id": "url-shortener-v1",
+  "title": "Viral URL Shortener",
+  "narrative": "Your URL shortener has been quietly serving a small audience. A link has just gone viral and traffic is about to surge. Build an architecture that keeps redirects fast and reliable without exceeding the monthly budget.",
+  "components_available": [
+    "ec2",
+    "load_balancer",
+    "redis_cache",
+    "database",
+    "cdn"
+  ],
+  "traffic_pattern": {
+    "phases": [
+      {
+        "duration_s": 30,
+        "req_per_s": 10,
+        "read_write_ratio": 0.95
+      },
+      {
+        "duration_s": 60,
+        "req_per_s": 500,
+        "read_write_ratio": 0.98
+      }
+    ]
+  },
+  "constraints": {
+    "max_budget_per_month": 100
+  },
+  "failure_condition": {
+    "type": "capacity_overflow"
+  },
+  "win_condition": {
+    "min_success_rate": 0.99,
+    "evaluation_window_s": 30
+  }
+}
