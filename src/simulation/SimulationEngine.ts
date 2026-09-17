@@ -56,8 +56,8 @@ export class SimulationEngine {
       this.second,
       phase.req_per_s
     );
-
-    const balls = generated.map((ball) => this.routeBall(ball));
+    const visits = new Map<string, number>();
+    const balls = generated.map((ball) => this.routeBall(ball, visits));
     const sample = sampleBalls(this.second, balls);
     this.samples = [...this.samples, sample];
 
@@ -79,7 +79,10 @@ export class SimulationEngine {
     };
   }
 
-  private routeBall(ball: Ball): Ball {
+  private routeBall(
+    ball: Ball,
+    visits: Map<string, number>
+  ): Ball {
     if (this.components.length === 0) {
       return { ...ball, state: "rejected" };
     }
@@ -100,16 +103,16 @@ export class SimulationEngine {
     while (current && !visited.has(current.id)) {
       visited.add(current.id);
       const definition = getComponentDefinition(current.componentType);
-      const sameSecondVisits = this.samples.length === 0
-        ? 0
-        : 0;
+      const activeRequests = visits.get(current.id) ?? 0;
       const outcome = definition.evaluate(routedBall, {
-        activeRequests: sameSecondVisits,
+        activeRequests,
         capacity: definition.capacity,
       });
 
+      if (outcome.type !== "pass") return outcome.ball;
+
+      visits.set(current.id, activeRequests + 1);
       routedBall = outcome.ball;
-      if (outcome.type !== "pass") return routedBall;
 
       const outgoing = this.connections.filter(
         (connection) => connection.sourceId === current?.id
