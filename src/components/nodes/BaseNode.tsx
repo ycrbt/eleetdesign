@@ -87,13 +87,10 @@ export function NodeView({
         border
         bg-white
         shadow-sm
-        transition-[transform,box-shadow]
-        duration-200
-        ease-out
 
         ${
           isDragging
-            ? "z-[100] cursor-grabbing shadow-xl"
+            ? "node-pickup-animation z-[100] cursor-grabbing shadow-xl"
             : "z-10 cursor-grab"
         }
 
@@ -108,7 +105,10 @@ export function NodeView({
         top: node.position.y,
         width: node.size.width,
         minHeight: node.size.height,
-        transform: `scale(${pickupScale})`,
+        transform:
+          pickupScale === 1
+            ? undefined
+            : `scale(${pickupScale})`,
         transformOrigin: "center center",
       }}
     >
