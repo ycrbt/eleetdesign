@@ -1,5 +1,4 @@
 import { ServerNode } from "../nodes/server/ServerNode";
-import { ServerNodeView } from "../nodes/server/ServerNode";
 
 type NodeDockProps = {
   onPickNode: (
@@ -24,12 +23,10 @@ export function NodeDock({
       className="
         absolute bottom-5 left-1/2 z-50
         -translate-x-1/2
-
         rounded-2xl
         border border-slate-200
         bg-white
         p-3
-
         shadow-xl
       "
     >
@@ -38,23 +35,29 @@ export function NodeDock({
       </div>
 
       <div
+        role="button"
+        tabIndex={0}
+        onPointerDown={(event) => {
+          event.stopPropagation();
+          onPickNode(serverTemplate, event);
+        }}
         className="
-          relative
-          h-[140px]
-          w-[220px]
+          flex h-12 min-w-28
+          cursor-grab items-center justify-center
+          rounded-xl border border-slate-200
+          bg-white px-5
+          text-sm font-semibold text-slate-900
+          shadow-sm
+          transition-[transform,box-shadow,border-color]
+          duration-150 ease-out
+          hover:-translate-y-0.5
+          hover:border-slate-300
+          hover:shadow-md
+          active:cursor-grabbing
+          active:scale-95
         "
       >
-        <ServerNodeView
-          node={serverTemplate}
-          onPointerDown={(event) => {
-            event.stopPropagation();
-
-            onPickNode(
-              serverTemplate,
-              event
-            );
-          }}
-        />
+        {serverTemplate.name}
       </div>
     </div>
   );
