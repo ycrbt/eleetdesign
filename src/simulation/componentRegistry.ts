@@ -4,10 +4,7 @@ import type {
   ComponentRuntimeState,
 } from "../engine/types";
 
-function evaluateCapacity(
-  ball: Ball,
-  state: ComponentRuntimeState
-) {
+function evaluateCapacity(ball: Ball, state: ComponentRuntimeState) {
   if (state.activeRequests >= state.capacity) {
     return {
       type: "reject" as const,
@@ -15,34 +12,22 @@ function evaluateCapacity(
       reason: "capacity_overflow",
     };
   }
-
-  return {
-    type: "pass" as const,
-    ball,
-  };
+  return { type: "pass" as const, ball };
 }
 
-function evaluateReadCache(
-  ball: Ball,
-  state: ComponentRuntimeState
-) {
+function evaluateReadCache(ball: Ball, state: ComponentRuntimeState) {
   const capacityOutcome = evaluateCapacity(ball, state);
   if (capacityOutcome.type !== "pass") return capacityOutcome;
-
   if (ball.metadata.operation === "read") {
-    return {
-      type: "pass" as const,
-      ball: { ...ball, state: "success" as const },
-    };
+    return { type: "pass" as const, ball: { ...ball, state: "success" as const } };
   }
-
   return capacityOutcome;
 }
 
 export const componentRegistry: Record<string, ComponentDefinition> = {
   ec2: {
     id: "ec2",
-    name: "EC2",
+    name: "Server",
     capacity: 100,
     monthlyCost: 25,
     ports: { inputs: 1, outputs: 1 },
@@ -58,7 +43,7 @@ export const componentRegistry: Record<string, ComponentDefinition> = {
   },
   redis_cache: {
     id: "redis_cache",
-    name: "Redis Cache",
+    name: "Cache",
     capacity: 800,
     monthlyCost: 22,
     ports: { inputs: 1, outputs: 1 },
@@ -74,7 +59,7 @@ export const componentRegistry: Record<string, ComponentDefinition> = {
   },
   cdn: {
     id: "cdn",
-    name: "CDN",
+    name: "Edge Cache",
     capacity: 1500,
     monthlyCost: 20,
     ports: { inputs: 1, outputs: 1 },
