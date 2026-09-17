@@ -1,19 +1,8 @@
-import type {
-  Ball,
-  ComponentInstance,
-  Connection,
-} from "../engine/types";
+import type { Ball, ComponentInstance, Connection } from "../engine/types";
 import type { ProblemDefinition } from "../problems/types";
 import { getComponentDefinition } from "./componentRegistry";
-import {
-  generateTraffic,
-  getTrafficPhase,
-} from "./trafficGenerator";
-import {
-  sampleBalls,
-  successRate,
-  type SimulationSample,
-} from "./metricsTracker";
+import { generateTraffic, getTrafficPhase } from "./trafficGenerator";
+import { sampleBalls, successRate, type SimulationSample } from "./metricsTracker";
 
 export type SimulationTick = {
   second: number;
@@ -44,20 +33,12 @@ export class SimulationEngine {
   }
 
   tick(): SimulationTick {
-    const phase = getTrafficPhase(
-      this.problem.traffic_pattern.phases,
-      this.second
-    );
-
+    const phase = getTrafficPhase(this.problem.traffic_pattern.phases, this.second);
     if (!phase) return this.finish();
 
-    const generated = generateTraffic(
-      phase,
-      this.second,
-      phase.req_per_s
-    );
-    const visits = new Map<string, number>();
-    const balls = generated.map((ball) => this.routeBall(ball, visits));
+    const usage = new Map<string, number>();
+    const generated = generateTraffic(phase, this.second, phase.req_per_s);
+    const balls = generated.map((ball) => this.routeBall(ball, usage));
     const sample = sampleBalls(this.second, balls);
     this.samples = [...this.samples, sample];
 
@@ -68,7 +49,6 @@ export class SimulationEngine {
     );
 
     this.second += 1;
-
     return {
       second: this.second,
       balls,
@@ -79,48 +59,35 @@ export class SimulationEngine {
     };
   }
 
-  private routeBall(
-    ball: Ball,
-    visits: Map<string, number>
-  ): Ball {
-    if (this.components.length === 0) {
-      return { ...ball, state: "rejected" };
-    }
+  private routeBall(ball: Ball, usage: Map<string, number>): Ball {
+    if (this.components.length === 0) return { ...ball, state: "rejected" };
 
-    const incoming = new Set(
-      this.connections.map((connection) => connection.targetId)
-    );
-    const entry = this.components.find(
-      (component) => !incoming.has(component.id)
-    );
+    const incoming = new Set(this.connections.map((connection) => connection.targetId));
+    const entries = this.components.filter((component) => !incoming.has(component.id));
+    if (entries.length !== 1) return { ...ball, state: "rejected" };
 
-    if (!entry) return { ...ball, state: "rejected" };
-
-    let current: ComponentInstance | undefined = entry;
+    let current: ComponentInstance | undefined = entries[0];
     let routedBall = ball;
     const visited = new Set<string>();
 
     while (current && !visited.has(current.id)) {
       visited.add(current.id);
       const definition = getComponentDefinition(current.componentType);
-      const activeRequests = visits.get(current.id) ?? 0;
+      const activeRequests = usage.get(current.id) ?? 0;
       const outcome = definition.evaluate(routedBall, {
         activeRequests,
         capacity: definition.capacity,
       });
 
-      if (outcome.type !== "pass") return outcome.ball;
-
-      visits.set(current.id, activeRequests + 1);
+      usage.set(current.id, activeRequests + 1);
       routedBall = outcome.ball;
+      if (outcome.type !== "pass") return routedBall;
+      if (routedBall.state === "success") return routedBall;
 
       const outgoing = this.connections.filter(
         (connection) => connection.sourceId === current?.id
       );
-
-      if (outgoing.length === 0) {
-        return { ...routedBall, state: "success" };
-      }
+      if (outgoing.length === 0) return { ...routedBall, state: "success" };
 
       const nextConnection = outgoing[
         Math.floor(Math.random() * outgoing.length)
@@ -141,8 +108,7 @@ export class SimulationEngine {
       currentSecond
     );
     const monthlyCost = this.components.reduce(
-      (sum, component) =>
-        sum + getComponentDefinition(component.componentType).monthlyCost,
+      (sum, component) => sum + getComponentDefinition(component.componentType).monthlyCost,
       0
     );
     const passed =
