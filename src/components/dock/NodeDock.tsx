@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { ServerNode } from "../nodes/server/ServerNode";
 
 type NodeDockProps = {
@@ -7,6 +8,8 @@ type NodeDockProps = {
   ) => void;
 };
 
+const DOCK_MARGIN = 20;
+
 export function NodeDock({
   onPickNode,
 }: NodeDockProps) {
@@ -14,6 +17,57 @@ export function NodeDock({
     x: 0,
     y: 0,
   });
+
+  const [visualBottomInset, setVisualBottomInset] =
+    useState(0);
+
+  useEffect(() => {
+    const viewport = window.visualViewport;
+
+    if (!viewport) return;
+
+    const updateVisualViewport = () => {
+      const visibleBottom =
+        viewport.offsetTop + viewport.height;
+
+      const hiddenBelowViewport = Math.max(
+        0,
+        window.innerHeight - visibleBottom
+      );
+
+      setVisualBottomInset(hiddenBelowViewport);
+    };
+
+    updateVisualViewport();
+
+    viewport.addEventListener(
+      "resize",
+      updateVisualViewport
+    );
+    viewport.addEventListener(
+      "scroll",
+      updateVisualViewport
+    );
+    window.addEventListener(
+      "resize",
+      updateVisualViewport
+    );
+
+    return () => {
+      viewport.removeEventListener(
+        "resize",
+        updateVisualViewport
+      );
+      viewport.removeEventListener(
+        "scroll",
+        updateVisualViewport
+      );
+      window.removeEventListener(
+        "resize",
+        updateVisualViewport
+      );
+    };
+  }, []);
 
   return (
     <div
@@ -30,7 +84,7 @@ export function NodeDock({
         shadow-xl
       "
       style={{
-        bottom: "calc(1.25rem + env(safe-area-inset-bottom, 0px))",
+        bottom: `calc(${DOCK_MARGIN + visualBottomInset}px + env(safe-area-inset-bottom, 0px))`,
       }}
     >
       <div className="mb-2 text-xs font-medium text-slate-400">
