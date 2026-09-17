@@ -25,6 +25,7 @@ export class ServerNode extends BaseNode {
 type ServerNodeViewProps = {
   node: ServerNode;
   isDragging?: boolean;
+  pickupScale?: number;
 
   onPointerDown?: (
     event: React.PointerEvent<HTMLDivElement>
@@ -34,12 +35,14 @@ type ServerNodeViewProps = {
 export function ServerNodeView({
   node,
   isDragging = false,
+  pickupScale = 1,
   onPointerDown,
 }: ServerNodeViewProps) {
   return (
     <NodeView
       node={node}
       isDragging={isDragging}
+      pickupScale={pickupScale}
       onPointerDown={onPointerDown}
     >
       <div className="p-4">
