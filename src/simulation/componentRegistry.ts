@@ -22,10 +22,24 @@ function evaluateCapacity(
   };
 }
 
-export const componentRegistry: Record<
-  string,
-  ComponentDefinition
-> = {
+function evaluateReadCache(
+  ball: Ball,
+  state: ComponentRuntimeState
+) {
+  const capacityOutcome = evaluateCapacity(ball, state);
+  if (capacityOutcome.type !== "pass") return capacityOutcome;
+
+  if (ball.metadata.operation === "read") {
+    return {
+      type: "pass" as const,
+      ball: { ...ball, state: "success" as const },
+    };
+  }
+
+  return capacityOutcome;
+}
+
+export const componentRegistry: Record<string, ComponentDefinition> = {
   ec2: {
     id: "ec2",
     name: "EC2",
@@ -48,7 +62,7 @@ export const componentRegistry: Record<
     capacity: 800,
     monthlyCost: 22,
     ports: { inputs: 1, outputs: 1 },
-    evaluate: evaluateCapacity,
+    evaluate: evaluateReadCache,
   },
   database: {
     id: "database",
@@ -64,18 +78,12 @@ export const componentRegistry: Record<
     capacity: 1500,
     monthlyCost: 20,
     ports: { inputs: 1, outputs: 1 },
-    evaluate: evaluateCapacity,
+    evaluate: evaluateReadCache,
   },
 };
 
-export function getComponentDefinition(
-  id: string
-): ComponentDefinition {
+export function getComponentDefinition(id: string): ComponentDefinition {
   const definition = componentRegistry[id];
-
-  if (!definition) {
-    throw new Error(`Unknown component: ${id}`);
-  }
-
+  if (!definition) throw new Error(`Unknown component: ${id}`);
   return definition;
 }
