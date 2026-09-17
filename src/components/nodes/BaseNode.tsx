@@ -63,6 +63,7 @@ type NodeViewProps = {
   children?: ReactNode;
   selected?: boolean;
   isDragging?: boolean;
+  pickupScale?: number;
   onPointerDown?: (
     event: React.PointerEvent<HTMLDivElement>
   ) => void;
@@ -73,6 +74,7 @@ export function NodeView({
   children,
   selected = false,
   isDragging = false,
+  pickupScale = 1,
   onPointerDown,
 }: NodeViewProps) {
   return (
@@ -81,11 +83,13 @@ export function NodeView({
       className={`
         pointer-events-auto
         absolute
-
         rounded-xl
         border
         bg-white
         shadow-sm
+        transition-[transform,box-shadow]
+        duration-200
+        ease-out
 
         ${
           isDragging
@@ -104,6 +108,8 @@ export function NodeView({
         top: node.position.y,
         width: node.size.width,
         minHeight: node.size.height,
+        transform: `scale(${pickupScale})`,
+        transformOrigin: "center center",
       }}
     >
       {children}
