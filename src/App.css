@@ -1,1 +1,23 @@
 @import "tailwindcss";
+
+@keyframes node-pickup {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.82;
+  }
+
+  65% {
+    transform: scale(1.035);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.node-pickup-animation {
+  animation: node-pickup 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform-origin: center center;
+}
